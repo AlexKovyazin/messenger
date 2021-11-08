@@ -11,9 +11,11 @@ def process_client_message(message: dict):
     :param message: dict
     :return: dict
     """
-    if message[ACTION] == 'presence' and \
-            message[TIME] and \
-            message[USER] and \
+    required_keys = {ACTION, TIME, USER}
+
+    if required_keys.issubset(set(message.keys())) and \
+            message[ACTION] == 'presence' and \
+            ACCOUNT_NAME in message[USER].keys() and \
             message[USER][ACCOUNT_NAME] == 'Guest':
         return {RESPONSE: 200}
     else:
