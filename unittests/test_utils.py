@@ -51,28 +51,32 @@ class TestUtils(unittest.TestCase):
             "message": 'Hi there!'
         }
         self.test_socket = TestSocket(self.message_dict)
+        self.test_parameters = ['-p', '8800', '-a', '127.0.0.50']
 
-    def test_get_message(self):
+    def test_get_message_type(self):
         self.assertIsInstance(get_message(self.test_socket), dict)
 
+    def test_get_message_ValueError(self):
         wrong_socket = TestSocket('string')
         self.assertRaises(ValueError, get_message, wrong_socket)
 
-    def test_send_message(self):
+    def test_send_message_empty_at_first(self):
         self.assertIs(self.test_socket.received_message, None)
 
+    def test_send_message_object(self):
         send_message(self.test_socket, self.message_dict)
-
-        self.assertIsInstance(self.test_socket.received_message, bytes)
         self.assertEqual(self.test_socket.received_message, json.dumps(self.message_dict).encode(ENCODING))
 
-    def test_validate_parameters(self):
-        test_parameters = ['-p', '8800', '-a', '127.0.0.50']
+    def test_validate_parameters_port(self):
+        self.assertEqual(validate_parameters(['-p', '8800', '-a', '127.0.0.50'])[0], int(self.test_parameters[1]))
 
-        self.assertEqual(validate_parameters(['-p', '8800', '-a', '127.0.0.50'])[0], int(test_parameters[1]))
-        self.assertEqual(validate_parameters(['-p', '8800', '-a', '127.0.0.50'])[1], str(test_parameters[3]))
+    def test_validate_parameters_host(self):
+        self.assertEqual(validate_parameters(['-p', '8800', '-a', '127.0.0.50'])[1], str(self.test_parameters[3]))
 
+    def test_validate_parameters_default_port(self):
         self.assertEqual(validate_parameters(['-a', '127.0.0.50'])[0], DEFAULT_PORT)
+
+    def test_validate_parameters_default_host(self):
         self.assertEqual(validate_parameters(['-p', '8800'])[1], DEFAULT_IP_ADDRESS)
 
 

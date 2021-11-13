@@ -42,14 +42,25 @@ class TestServer(unittest.TestCase):
             }
         }
 
-    def test_process_client_message(self):
+    def test_process_client_message_correct_dict_type(self):
         self.assertIsInstance(process_client_message(self.correct_client_dict), dict)
+
+    def test_process_client_message_not_correct_dict_type(self):
         self.assertIsInstance(process_client_message(self.not_correct_client_dict_1), dict)
 
+    def test_process_client_message_equality(self):
         self.assertEqual(process_client_message(self.correct_client_dict), {RESPONSE: 200})
+
+    def test_process_client_message_wrong_ACTION(self):
         self.assertEqual(process_client_message(self.not_correct_client_dict_1), {RESPONSE: 400, ERROR: 'Bad request'})
+
+    def test_process_client_message_TIME_missing(self):
         self.assertEqual(process_client_message(self.not_correct_client_dict_2), {RESPONSE: 400, ERROR: 'Bad request'})
+
+    def test_process_client_message_USER_missing(self):
         self.assertEqual(process_client_message(self.not_correct_client_dict_3), {RESPONSE: 400, ERROR: 'Bad request'})
+
+    def test_process_client_message_not_Guest(self):
         self.assertEqual(process_client_message(self.not_correct_client_dict_4), {RESPONSE: 400, ERROR: 'Bad request'})
 
 
