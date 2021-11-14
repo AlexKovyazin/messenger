@@ -56,8 +56,12 @@ def main():
     server_port, server_address = validate_parameters(sys.argv)
 
     # Подключение к серверу и отправка сообщения о присутствии
-    client_socket = socket(AF_INET, SOCK_STREAM)
-    client_socket.connect((server_address, server_port))
+    try:
+        client_socket = socket(AF_INET, SOCK_STREAM)
+        client_socket.connect((server_address, server_port))
+    except ConnectionRefusedError:
+        c_log.critical('Подключение не установлено, т.к. конечный компьютер отверг запрос на подключение')
+        sys.exit(1)
 
     c_log.info(f'Установлено соединение с сервером на хосте {server_address}, порт {server_port}')
 
