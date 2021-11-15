@@ -4,11 +4,13 @@ from common.utils import get_message, send_message, validate_parameters
 import sys
 import logging
 import log.server_log_config
+from decos import Log
 
 
 s_log = logging.getLogger('server')
 
 
+@Log()
 def process_client_message(message: dict):
     """
     Проверяет сообщение пользователя о присутствии и возвращает ответ с кодом

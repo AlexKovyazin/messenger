@@ -6,11 +6,13 @@ import json
 import time
 import logging
 import log.client_log_config
+from decos import Log
 
 
 c_log = logging.getLogger('client')
 
 
+@Log()
 def process_answer(server_answer: dict):
     """
     Обрабатывает ответ сервера на отправленное сообщение о присутствии
@@ -29,6 +31,7 @@ def process_answer(server_answer: dict):
         return f'{server_answer[RESPONSE]}: {server_answer[ERROR]}'
 
 
+@Log()
 def create_presence(account_name='Guest'):
     """
     Формирует сообщение серверу о присутствии
