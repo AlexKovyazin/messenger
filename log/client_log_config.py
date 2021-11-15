@@ -7,7 +7,7 @@ PATH = os.path.join(PATH, 'logs', 'client.log')
 
 filename = os.getcwd() + r'\logs\server_log.txt'
 
-formatter = logging.Formatter('%(asctime)s \t %(levelname)s \t %(filename)s \t %(message)s')
+formatter = logging.Formatter('%(asctime)s\t%(levelname)s\t%(filename)s\t%(message)s')
 
 handler = logging.FileHandler(PATH, encoding='utf-8')
 handler.setLevel(logging.DEBUG)
