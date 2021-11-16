@@ -2,8 +2,10 @@ import json
 from .variables import DEFAULT_PORT, DEFAULT_IP_ADDRESS, ENCODING, MAX_PACKAGE_LENGTH
 from socket import socket
 import sys
+from decos import Log
 
 
+@Log()
 def get_message(sock: socket):
     """
     Получает сообщение из сокета, декодирует,
@@ -21,6 +23,7 @@ def get_message(sock: socket):
         raise ValueError
 
 
+@Log()
 def send_message(sock: socket, message: dict):
     """
     Переводит словарь в байты, записывает в указанный сокет
@@ -32,6 +35,7 @@ def send_message(sock: socket, message: dict):
     sock.send(json_str.encode(ENCODING))
 
 
+@Log()
 def validate_parameters(parameters: list):
     """
     Валидирует переданные параметры запуска скрипта из sys.argv,
