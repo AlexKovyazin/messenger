@@ -1,8 +1,10 @@
 import json
-from .variables import DEFAULT_PORT, DEFAULT_IP_ADDRESS, ENCODING, MAX_PACKAGE_LENGTH
+from .variables import DEFAULT_PORT, DEFAULT_IP_ADDRESS, DEFAULT_CLIENT_MODE, ENCODING, MAX_PACKAGE_LENGTH
 from socket import socket
 import sys
+import inspect
 from decos import Log
+from exceptions import WrongMode
 
 
 @Log()
@@ -44,8 +46,29 @@ def validate_parameters(parameters: list):
     второй элемент - вдрес хоста (str)
 
     :param parameters: list
-    :return: tuple(port, address,)
+    :return: tuple(port, address, mode,)
     """
+    path = inspect.stack()[2][1]
+    filename = path.split('/')[-1]
+
+    try:
+        if filename == 'client.py':
+            if '-m' in parameters:
+                mode = parameters[parameters.index('-m') + 1]
+                if mode not in ('send', 'listen',):
+                    raise WrongMode
+            else:
+                mode = DEFAULT_CLIENT_MODE
+        else:
+            mode = None
+
+    except IndexError:
+        print("После параметра '-mode' необходимо указать режим (listen/send)")
+        sys.exit(1)
+    except WrongMode:
+        print("Параметр -mode допускает только значения send/listen")
+        sys.exit(1)
+
     try:
         if '-p' in parameters:
             port = int(parameters[parameters.index('-p') + 1])
@@ -72,4 +95,4 @@ def validate_parameters(parameters: list):
         print("После параметра '-a' необходимо указать IP адрес, с которым будет работать сервер")
         sys.exit(1)
 
-    return port, address
+    return port, address, mode
