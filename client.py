@@ -52,6 +52,42 @@ def create_presence(account_name='Guest'):
     return presence_message
 
 
+@Log()
+def create_message(sock, account_name='Guest'):
+    message = input('Для завершения работы введите "!!!"\nВведите сообщение для отправки: ')
+    c_log.info('Сообщение пользователя принято')
+    if message == '!!!':
+        sock.close()
+        c_log.info('Пользователь завершил работу')
+        print('Пока!')
+        sys.exit(0)
+    else:
+        message_dict = {
+            ACTION: MESSAGE,
+            TIME: time.time(),
+            USER: {
+                ACCOUNT_NAME: account_name
+            },
+            MESSAGE_TEXT: message
+        }
+        c_log.info('Сообщение сформировано')
+    return message_dict
+
+
+@Log()
+def message_from_server(message: dict):
+    required_keys = {ACTION, SENDER, MESSAGE_TEXT}
+    c_log.info('Запущена функция message_from_server()')
+
+    if required_keys.issubset(set(message.keys())) and message[ACTION] == MESSAGE:
+        print(f'{message[SENDER]} {time.ctime(message[TIME])}:\n'
+              f'{message[MESSAGE_TEXT]}')
+        c_log.info(f'Получено сообщение от пользователя {message[SENDER]} {time.ctime(message[TIME])}: '
+                   f'{message[MESSAGE_TEXT]}')
+    else:
+        c_log.error(f'Получено некорректное сообщение: {message}')
+
+
 def main():
     c_log.info('Запуск клиента')
 
