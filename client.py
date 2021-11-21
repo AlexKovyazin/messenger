@@ -1,4 +1,4 @@
-from common.variables import ACTION, PRESENCE, TIME, USER, ACCOUNT_NAME, RESPONSE, ERROR
+from common.variables import ACTION, PRESENCE, TIME, USER, ACCOUNT_NAME, RESPONSE, ERROR, MESSAGE, MESSAGE_TEXT, SENDER
 from common.utils import validate_parameters, send_message, get_message
 from socket import socket, AF_INET, SOCK_STREAM
 import sys
@@ -91,8 +91,8 @@ def message_from_server(message: dict):
 def main():
     c_log.info('Запуск клиента')
 
-    # Валидация параметров запуска
-    server_port, server_address = validate_parameters(sys.argv)
+    # Валидация параметров запуска и их присвоение переменным
+    server_port, server_address, client_mode = validate_parameters(sys.argv)
 
     # Подключение к серверу и отправка сообщения о присутствии
     try:
@@ -102,7 +102,7 @@ def main():
         c_log.critical('Подключение не установлено, т.к. конечный компьютер отверг запрос на подключение')
         sys.exit(1)
 
-    c_log.info(f'Установлено соединение с сервером на хосте {server_address}, порт {server_port}')
+    c_log.info(f'Установлено соединение с сервером на хосте {server_address}, порт {server_port}, режим {client_mode}')
 
     presence_message = create_presence()
     send_message(client_socket, presence_message)
@@ -115,6 +115,28 @@ def main():
         c_log.info(f'Получен ответ от сервера {answer}')
     except (ValueError, json.JSONDecodeError):
         c_log.error('ValueError! Не удалось декодировать сообщение сервера')
+
+    while True:
+        if client_mode == 'send':
+            print('Режим работы - отправка сообщений')
+            c_log.info('Режим работы - отправка сообщений')
+
+            try:
+                send_message(client_socket, create_message(client_socket))
+                c_log.info('Сообщение отправлено другим клиентам')
+            except (ConnectionResetError, ConnectionError, ConnectionAbortedError):
+                c_log.error(f'Соединение с сервером {server_address} потеряно')
+                sys.exit(1)
+
+        else:
+            print('Режим работы - прием сообщений')
+            c_log.info('Режим работы - прием сообщений')
+
+            try:
+                message_from_server(get_message(client_socket))
+            except (ConnectionResetError, ConnectionError, ConnectionAbortedError):
+                c_log.error(f'Соединение с сервером {server_address} потеряно')
+                sys.exit(1)
 
 
 if __name__ == '__main__':
