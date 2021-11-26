@@ -1,20 +1,19 @@
 import json
-from .variables import DEFAULT_PORT, DEFAULT_IP_ADDRESS, DEFAULT_CLIENT_MODE, ENCODING, MAX_PACKAGE_LENGTH
+from .variables import DEFAULT_PORT, DEFAULT_IP_ADDRESS, ENCODING, MAX_PACKAGE_LENGTH
 from socket import socket
 import sys
 import inspect
 from decos import Log
-from exceptions import WrongMode
 
 
 @Log()
 def get_message(sock: socket):
     """
-    Получает сообщение из сокета, декодирует,
-    возвращает словарь
+    Декодирует и возвращает объект из сокета
 
-    :param sock: socket
-    :return: dict
+    :param sock: socket сокет клиента
+    :return: dict словарь сообщения из сокета
+    (принято, что сервер и клиент обмениваются только словарями)
     """
     message = sock.recv(MAX_PACKAGE_LENGTH)
     message.decode(ENCODING)
@@ -30,8 +29,8 @@ def send_message(sock: socket, message: dict):
     """
     Переводит словарь в байты, записывает в указанный сокет
 
-    :param sock: socket
-    :param message: dict
+    :param sock: socket сокет клиента
+    :param message: dict сообщение клиента
     """
     json_str = json.dumps(message)
     sock.send(json_str.encode(ENCODING))
@@ -43,9 +42,10 @@ def validate_parameters(parameters: list):
     Валидирует переданные параметры запуска скрипта из sys.argv,
     возвращает кортеж, где
     первый элемент - номер порта (int),
-    второй элемент - вдрес хоста (str)
+    второй элемент - адрес хоста (str),
+    третий элемент - имя пользователя (str)
 
-    :param parameters: list
+    :param parameters: list параметры запуска скрипта
     :return: tuple(port, address, mode,)
     """
     path = inspect.stack()[2][1]
@@ -53,20 +53,15 @@ def validate_parameters(parameters: list):
 
     try:
         if filename == 'client.py':
-            if '-m' in parameters:
-                mode = parameters[parameters.index('-m') + 1]
-                if mode not in ('send', 'listen',):
-                    raise WrongMode
+            if '-n' in parameters:
+                username = parameters[parameters.index('-n') + 1]
             else:
-                mode = DEFAULT_CLIENT_MODE
+                username = None
         else:
-            mode = None
+            username = None
 
     except IndexError:
-        print("После параметра '-mode' необходимо указать режим (listen/send)")
-        sys.exit(1)
-    except WrongMode:
-        print("Параметр -mode допускает только значения send/listen")
+        print("После параметра '-n' необходимо указать имя пользователя")
         sys.exit(1)
 
     try:
@@ -95,4 +90,4 @@ def validate_parameters(parameters: list):
         print("После параметра '-a' необходимо указать IP адрес, с которым будет работать сервер")
         sys.exit(1)
 
-    return port, address, mode
+    return port, address, username
